@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 contract ArrayMapping {
     uint256[3] public fixedArray;
     uint256[] public bigArray;
-    uint8[] public smallArray;
+    uint8[] public smallArray; // variable packing
 
     mapping(uint256 => uint256) public simpleMapping;
     mapping(uint256 => mapping(uint256 => uint256)) public nestedMapping;
@@ -22,6 +22,13 @@ contract ArrayMapping {
             22,
             33
         ];
+    }
+
+    // does not store the lenght, the first slot is the first item directly
+    function getFixedArrayItemLength() external view returns (uint256 x) {
+        assembly {
+            x := sload(fixedArray.slot)
+        }
     }
 
     function getFixedArrayItemByIndex(
@@ -52,6 +59,33 @@ contract ArrayMapping {
         }
     }
 
+    function getSmallArrayLength() external view returns (uint256 x) {
+        assembly {
+            x := sload(smallArray.slot)
+        }
+    }
+
+    function getSmallArrayItemByIndex(
+        uint256 index
+    ) external view returns (bytes32 x) {
+        uint256 slot;
+        assembly {
+            slot := smallArray.slot
+        }
+        // keccak256 works out of assembly code
+        bytes32 location = keccak256(abi.encode(slot));
+        assembly {
+            x := sload(add(location, index))
+        }
+    }
+
+    // does not work
+    function getSimpleMappingLength() external view returns (uint256 x) {
+        assembly {
+            x := sload(simpleMapping.slot)
+        }
+    }
+
     function getSimpleMapping(uint256 key) external view returns (uint256 x) {
         uint256 slot;
         assembly {
@@ -69,7 +103,8 @@ contract ArrayMapping {
         assembly {
             slot := nestedMapping.slot
         }
-        // double keccak256!!
+        // double encode and keccak256!!
+        // looks at 3 (external) first and then at 4 (internal)
         bytes32 location = keccak256(
             abi.encode((4), keccak256(abi.encode(3, slot)))
         );
@@ -78,7 +113,7 @@ contract ArrayMapping {
         }
     }
 
-    function lengthAddressToList() external view returns (uint256 x) {
+    function getAddressToListLength() external view returns (uint256 x) {
         uint256 slot;
         assembly {
             slot := addressToList.slot
