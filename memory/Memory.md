@@ -24,14 +24,14 @@ it is true that is cheaper to access memory than storage, but the further you ac
 
 - `mload(0xfffffffffffffff)`
 
-commands:
+### commands
 
 - `mstore(p, v)`: stores value v in slot p (just like sstore)
 - `mload(p)`: retrieves 32 bytes from slot p (e.g: `mload(0x20)`)
 - `mstore8(p, v)`: like `mstore` but for 1 byte (there is `mload8()`)
 - `msize()`: largest accessed memory index in that transaction
 
-examples:
+### examples
 
 `mstore(0x00, 0xff..ff)` // 32 bytes value, it starts in byte 0x00 (0) and ends in 0x1f (31)
 `mstore(0x01, 0xff..ff)` // 32 bytes value, it starts in byte 0x01 (1) and ends in 0x2f (32)
